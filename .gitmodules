@@ -3,4 +3,5 @@
         url = https://github.com/forcedotcom/SalesforceMobileSDK-Shared.git
 [submodule "external/cordova"]
 	path = external/cordova
-	url = https://github.com/apache/cordova-android.git
+	url = git@github.com:MediaFriendsInc2/cordova-android.git
+	branch = mf
