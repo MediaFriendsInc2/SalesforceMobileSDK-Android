@@ -153,11 +153,11 @@ public class LoginActivity extends AccountAuthenticatorActivity
 			 * the back button should take the user back to the previous screen.
 			 */
 			final UserAccountManager accMgr = SalesforceSDKManager.getInstance().getUserAccountManager();
-			if (accMgr.getAuthenticatedUsers() == null) {
-				wasBackgrounded = true;
+			if (accMgr.getAuthenticatedUsers() != null) {
+				/*wasBackgrounded = true;
 				moveTaskToBack(true);
 				return true;
-			} else {
+			} else {*/
 				wasBackgrounded = true;
 				finish();
 				return true;
