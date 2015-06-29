@@ -40,8 +40,10 @@ import android.content.IntentFilter;
 import android.content.Loader;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -60,6 +62,8 @@ import android.widget.Toast;
 
 import com.salesforce.androidsdk.accounts.UserAccount;
 import com.salesforce.androidsdk.rest.RestClient;
+import com.salesforce.androidsdk.smartstore.store.QuerySpec;
+import com.salesforce.androidsdk.smartstore.store.QuerySpec.Order;
 import com.salesforce.androidsdk.smartstore.store.SmartStore;
 import com.salesforce.androidsdk.smartsync.app.SmartSyncSDKManager;
 import com.salesforce.androidsdk.smartsync.util.Constants;
@@ -67,6 +71,10 @@ import com.salesforce.androidsdk.ui.sfnative.SalesforceListActivity;
 import com.salesforce.samples.smartsyncexplorer.R;
 import com.salesforce.samples.smartsyncexplorer.loaders.ContactListLoader;
 import com.salesforce.samples.smartsyncexplorer.objects.ContactObject;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Main activity.
@@ -104,7 +112,7 @@ public class MainActivity extends SalesforceListActivity implements
 		Color.rgb(189, 195, 199),
 		Color.rgb(127, 140, 141)
 	};
-	
+
     private SearchView searchView;
     private ContactListAdapter listAdapter;
     private UserAccount curAccount;
@@ -283,7 +291,82 @@ public class MainActivity extends SalesforceListActivity implements
 
 	private void syncUpContacts() {
 		contactLoader.syncUp();
+		AsyncTaskRunner runner = new AsyncTaskRunner();
+		runner.execute("John");
 		Toast.makeText(this, "Sync up complete!", Toast.LENGTH_LONG).show();
+	}
+
+	private class AsyncTaskRunner extends AsyncTask<String, String, String>
+	{
+	    final int ITERATIONS = 10000;
+	    final int ITERATIONS_LOG = 50;
+
+	    @Override
+	    protected String doInBackground(String... params)
+	    {
+	        publishProgress("Start search"); // Calls onProgressUpdate()
+
+	        // Do your long operations here and return the result
+	        testQuery(params[0]);
+
+	        return "Search complete";
+	    }
+
+	    @Override
+	    protected void onPostExecute(String result)
+	    {
+	        // execution of result of Long time consuming operation
+	        Toast.makeText(MainActivity.this, result, Toast.LENGTH_SHORT).show();
+	    }
+
+	    @Override
+	    protected void onProgressUpdate(String... text)
+	    {
+	        Log.d(MainActivity.class.getName(), text[0]);
+	    }
+
+	    private void testQuery(String query)
+	    {
+	        SmartSyncSDKManager smartSyncSDKManager = SmartSyncSDKManager.getInstance();
+	        SmartStore smartStore = smartSyncSDKManager.getSmartStore();
+
+	        try
+	        {
+	            for (int i = 0; i < ITERATIONS; i++)
+	            {
+		QuerySpec querySpec = QuerySpec.buildExactQuerySpec(ContactListLoader.CONTACT_SOUP, "FirstName",
+		        query, 1);
+
+		JSONArray results = smartStore.query(querySpec, 0);
+		//Log.d(MainActivity.class.getName(), "Matches: " + results.length() + " " + results);
+		if (i % ITERATIONS_LOG == 0)
+		{
+		    publishProgress("Search: " + i);
+		}
+
+		if (results.length() > 0)
+		{
+		    JSONObject result = results.getJSONObject(0);
+
+		} else
+		{
+		    querySpec = QuerySpec.buildLikeQuerySpec(ContactListLoader.CONTACT_SOUP, "FirstName",
+		            "%" + query + "%", Order.ascending, 1);
+
+		    results = smartStore.query(querySpec, 0);
+		    //Log.d(MainActivity.class.getName(), "Matches: " + results.length() + " " + results);
+		    if (results.length() > 0)
+		    {
+		        JSONObject result = results.getJSONObject(0);
+		    }
+		}
+	            }
+
+	        } catch (JSONException e)
+	        {
+	            Log.e(MainActivity.class.getName(), e.getLocalizedMessage(), e);
+	        }
+	    }
 	}
 
 	/**
