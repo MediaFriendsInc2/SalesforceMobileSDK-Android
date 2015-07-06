@@ -334,8 +334,8 @@ public class MainActivity extends SalesforceListActivity implements
 	        {
 	            for (int i = 0; i < ITERATIONS; i++)
 	            {
-		QuerySpec querySpec = QuerySpec.buildExactQuerySpec(ContactListLoader.CONTACT_SOUP, "FirstName",
-		        query, 1);
+		QuerySpec querySpec = QuerySpec.buildExactQuerySpec(ContactListLoader.CONTACT_SOUP,
+		        Constants.ID, "FirstName", query, null, 1);
 
 		JSONArray results = smartStore.query(querySpec, 0);
 		//Log.d(MainActivity.class.getName(), "Matches: " + results.length() + " " + results);
@@ -351,7 +351,7 @@ public class MainActivity extends SalesforceListActivity implements
 		} else
 		{
 		    querySpec = QuerySpec.buildLikeQuerySpec(ContactListLoader.CONTACT_SOUP, "FirstName",
-		            "%" + query + "%", Order.ascending, 1);
+		            "%" + query + "%", "FirstName", Order.ascending, 1);
 
 		    results = smartStore.query(querySpec, 0);
 		    //Log.d(MainActivity.class.getName(), "Matches: " + results.length() + " " + results);
