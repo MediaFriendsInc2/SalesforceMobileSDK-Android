@@ -110,7 +110,9 @@ public class PushService extends IntentService {
      * @param intent Intent.
      */
     static void runIntentInService(Intent intent) {
-        final Context context = SalesforceSDKManager.getInstance().getAppContext();
+        try {
+            final Context context = SalesforceSDKManager.getInstance().getAppContext();
+
         if (WAKE_LOCK == null) {
             final PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             WAKE_LOCK = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
@@ -120,6 +122,9 @@ public class PushService extends IntentService {
         final ComponentName name = context.startService(intent);
         if (name == null) {
         	Log.w(TAG, "Could not start GCM service.");
+        }
+        } catch (Exception e) {
+            return;
         }
     }
 
